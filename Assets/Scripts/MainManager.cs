@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -11,14 +12,17 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
     private int m_Points;
     
     private bool m_GameOver = false;
+    public string bestScoreName;
+    public int bestScore;
 
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,6 +40,8 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        LoadScore();
+        BestScoreText.text = $"Best Score: {bestScoreName}: {bestScore}";
     }
 
     private void Update()
@@ -66,11 +72,42 @@ public class MainManager : MonoBehaviour
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+        Debug.Log(m_Points);
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        if(m_Points > bestScore) {
+            SaveScore();
+        }
+    }
+
+    [System.Serializable]
+    class SaveData {
+        public int scoreText;
+        public string username;
+    }
+
+    public void SaveScore() {
+        SaveData data = new SaveData();
+        data.scoreText = m_Points;
+        data.username = MainManagerMenu.Instance.username;
+
+        string json = JsonUtility.ToJson(data);
+        File.WriteAllText(Application.persistentDataPath + "/BestScore.json", json);
+    }
+
+    public void LoadScore() {
+        string path = Application.persistentDataPath + "/BestScore.json";
+
+        if(File.Exists(path)) {
+            string json = File.ReadAllText(path);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+
+            bestScore = data.scoreText;
+            bestScoreName = data.username;
+        }
     }
 }
