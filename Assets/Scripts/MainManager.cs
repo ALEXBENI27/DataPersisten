@@ -14,6 +14,8 @@ public class MainManager : MonoBehaviour
     public Text ScoreText;
     public Text BestScoreText;
     public GameObject GameOverText;
+    public GameObject exit;
+    public GameObject returnMenu;
     
     private bool m_Started = false;
     private int m_Points;
@@ -72,13 +74,14 @@ public class MainManager : MonoBehaviour
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
-        Debug.Log(m_Points);
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        exit.SetActive(true);
+        returnMenu.SetActive(true);
         if(m_Points > bestScore) {
             SaveScore();
         }
@@ -109,5 +112,14 @@ public class MainManager : MonoBehaviour
             bestScore = data.scoreText;
             bestScoreName = data.username;
         }
+    }
+
+    public void Exit() {
+        MenuUiHandler menuUiHandler = gameObject.AddComponent<MenuUiHandler>();
+        menuUiHandler.Exit();
+    }
+
+    public void ReturnMenu() {
+        SceneManager.LoadScene(0);
     }
 }
